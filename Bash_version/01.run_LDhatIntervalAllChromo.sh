@@ -25,15 +25,23 @@ do
 	ls | grep "batch_" > batch.list
 	
 	# Split files on batches based on NCPUS 
-	split batch.list -l $NCPUS  # for 20 threads parallization
+	#split batch.list -l $NCPUS  # for 20 threads parallization
 
-	# run INTERVAL on split files on each chromo
-	for batchlist in `echo x??` 
-        do 
-        	 bash batchjob_LDhat_IntervalParallel.sh ${chr} $batchlist $LK $ITER $SAMP $BPEN $BURNIN $NCPUS
-        done
+	# Save job command for each batch
+	for batch in `cat batch.list`
+	do
+		# Extract number of batch
+	        i=$( echo ${batch} | cut -f2 -d _ )
+	        # Run interval tool in background for paralleling
+        	echo "interval -seq ${batch}/${i}.ldhat.sites -loc ${batch}/${i}.ldhat.locs -lk ${LK} -its ${ITER} -bpen ${BPEN} -samp ${SAMP} -prefix ${batch}/ > ${batch}/logs.txt ; stat -input ${batch}/rates.txt -burn ${BURNIN} -loc ${batch}/${i}.ldhat.locs -prefix ${batch}/ && rm ${batch}/rates.txt ${batch}/type_table.txt ${batch}/bounds.txt ${batch}/logs.txt"
+
+		#Save jobs in file
+	done > parallel_jobs.list
 	
-	# Return
+	# run parallel computing
+	cat parallel_jobs.list | parallel -j $NCPUS
+	
+	# Return to population dir
 	cd ../../
 
 done
