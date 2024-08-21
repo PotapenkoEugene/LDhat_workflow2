@@ -8,7 +8,7 @@ list_chromosomes=$1 #list of the chromosome, one per line
 
 for i in $(cat "$list_chromosomes")  ;
 do
-   ls -v  chromo.$i/02-LDHAT_maf/batch_1.dataset.*/res.txt.gz  |\
+   ls -v  chromo.$i/LDHAT_maf/batch_*/res.txt.gz  |\
    xargs zcat |grep -v "\-1\.00" |\
    grep -v "Loci" > chromo.$i.results.txt  ;
 done
